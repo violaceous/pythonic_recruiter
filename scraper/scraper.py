@@ -10,15 +10,38 @@ def _get_browser():
     )
     browser = webdriver.Firefox(profile)
     return browser
-    
-################################################################################
 
 def _open_craigslist(link):
     browser = _get_browser()
     browser.implicitly_wait(3)
     browser.get(link)
-    elements = browser.find_elements_by_css_selector('.hdrlnk')
+    elements = browser.find_elements_by_css_selector('.i')
+    links = []
+    for element in elements:
+        links.append(element.get_attribute('href'))
     browser.quit()
-    return len(elements)
+    return links
+
+def _get_craigslist_contact_details(link):
+    browser = _get_browser()
+    browser.get(link)
+    results = {}
+    results['address'] = browser.find_element_by_css_selector('.anonemail').text
+    return results
+
+def _get_craigslist_post(link):
+    browser = _get_browser()
+    browser.get(link)
+    details = {}
+    details['link'] = link
+    details['title'] = browser.title
+    location = browser.find_element_by_css_selector('.postingtitle').text
+    details['location'] = location[location.rfind('(') + 1 : location.rfind(')')]
+    compensation = browser.find_element_by_css_selector('.bigattr').text
+    details['compensation'] = compensation[compensation.find(':') + 2:]
+    details['contact_link'] = browser.find_element_by_css_selector('#replylink').get_attribute('href')
+    browser.quit()
+    return details
+    
 
     
